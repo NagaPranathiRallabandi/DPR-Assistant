@@ -4,12 +4,56 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Progress } from "@/components/ui/progress";
 import { ArrowLeft, ArrowRight, Sparkles, FileText } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { Step1BusinessInfo, Step1FormData } from "@/components/dpr/Step1BusinessInfo";
+import { Step2ProjectDetails, Step2FormData } from "@/components/dpr/Step2ProjectDetails";
+import { Step3FinancialPlanning, Step3FormData } from "@/components/dpr/Step3FinancialPlanning";
+import { Step4MarketAnalysis, Step4FormData } from "@/components/dpr/Step4MarketAnalysis";
+import { Step5ReviewExport } from "@/components/dpr/Step5ReviewExport";
+import { useToast } from "@/hooks/use-toast";
 
 const CreateDPR = () => {
   const navigate = useNavigate();
+  const { toast } = useToast();
   const [currentStep, setCurrentStep] = useState(1);
   const totalSteps = 5;
   const progress = (currentStep / totalSteps) * 100;
+
+  // Form data storage
+  const [step1Data, setStep1Data] = useState<Step1FormData>();
+  const [step2Data, setStep2Data] = useState<Step2FormData>();
+  const [step3Data, setStep3Data] = useState<Step3FormData>();
+  const [step4Data, setStep4Data] = useState<Step4FormData>();
+
+  const handleStep1Submit = (data: Step1FormData) => {
+    setStep1Data(data);
+    setCurrentStep(2);
+    toast({ title: "Business information saved", description: "Moving to project details" });
+  };
+
+  const handleStep2Submit = (data: Step2FormData) => {
+    setStep2Data(data);
+    setCurrentStep(3);
+    toast({ title: "Project details saved", description: "Moving to financial planning" });
+  };
+
+  const handleStep3Submit = (data: Step3FormData) => {
+    setStep3Data(data);
+    setCurrentStep(4);
+    toast({ title: "Financial planning saved", description: "Moving to market analysis" });
+  };
+
+  const handleStep4Submit = (data: Step4FormData) => {
+    setStep4Data(data);
+    setCurrentStep(5);
+    toast({ title: "Market analysis saved", description: "Ready for review and export" });
+  };
+
+  const handleExport = () => {
+    toast({ 
+      title: "Exporting DPR", 
+      description: "Your Detailed Project Report is being generated..." 
+    });
+  };
 
   const steps = [
     { number: 1, title: "Business Information", description: "Tell us about your business" },
@@ -99,35 +143,60 @@ const CreateDPR = () => {
                 <CardDescription className="text-base">{steps[currentStep - 1].description}</CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
-                {/* Placeholder for form content */}
-                <div className="min-h-[400px] flex items-center justify-center border-2 border-dashed border-border rounded-lg">
-                  <div className="text-center space-y-4 p-8">
-                    <FileText className="h-16 w-16 text-muted-foreground mx-auto" />
-                    <p className="text-muted-foreground">
-                      Step {currentStep} form content will be implemented here
-                    </p>
-                  </div>
-                </div>
+                {currentStep === 1 && (
+                  <Step1BusinessInfo onSubmit={handleStep1Submit} defaultValues={step1Data} />
+                )}
+                {currentStep === 2 && (
+                  <Step2ProjectDetails onSubmit={handleStep2Submit} defaultValues={step2Data} />
+                )}
+                {currentStep === 3 && (
+                  <Step3FinancialPlanning onSubmit={handleStep3Submit} defaultValues={step3Data} />
+                )}
+                {currentStep === 4 && (
+                  <Step4MarketAnalysis onSubmit={handleStep4Submit} defaultValues={step4Data} />
+                )}
+                {currentStep === 5 && (
+                  <Step5ReviewExport 
+                    step1Data={step1Data}
+                    step2Data={step2Data}
+                    step3Data={step3Data}
+                    step4Data={step4Data}
+                    onExport={handleExport}
+                  />
+                )}
 
                 {/* Navigation Buttons */}
-                <div className="flex justify-between pt-6">
-                  <Button
-                    variant="outline"
-                    onClick={() => setCurrentStep(Math.max(1, currentStep - 1))}
-                    disabled={currentStep === 1}
-                  >
-                    <ArrowLeft className="h-4 w-4 mr-2" />
-                    Previous
-                  </Button>
-                  <Button
-                    variant="hero"
-                    onClick={() => setCurrentStep(Math.min(totalSteps, currentStep + 1))}
-                    disabled={currentStep === totalSteps}
-                  >
-                    Next
-                    <ArrowRight className="h-4 w-4 ml-2" />
-                  </Button>
-                </div>
+                {currentStep < 5 && (
+                  <div className="flex justify-between pt-6 border-t">
+                    <Button
+                      variant="outline"
+                      onClick={() => setCurrentStep(Math.max(1, currentStep - 1))}
+                      disabled={currentStep === 1}
+                    >
+                      <ArrowLeft className="h-4 w-4 mr-2" />
+                      Previous
+                    </Button>
+                    <Button
+                      variant="hero"
+                      type="submit"
+                      form={`step${currentStep}-form`}
+                    >
+                      Next
+                      <ArrowRight className="h-4 w-4 ml-2" />
+                    </Button>
+                  </div>
+                )}
+                {currentStep === 5 && (
+                  <div className="flex justify-start pt-6 border-t">
+                    <Button
+                      variant="outline"
+                      onClick={() => setCurrentStep(4)}
+                    >
+                      <ArrowLeft className="h-4 w-4 mr-2" />
+                      Previous
+                    </Button>
+                  </div>
+                )}
               </CardContent>
             </Card>
           </div>
